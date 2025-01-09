@@ -6,11 +6,20 @@ app.secret_key = 'your_secret_key'
 
 from questions import questions
 
+conn = sqlite3.connect('quiz_results.db')
+cursor = conn.cursor()
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS results
+                (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                score INTEGER)''')
+conn.commit()
+conn.close()
+
 def get_score():
-    data = []
-    
     conn = sqlite3.connect('quiz_results.db')
     cursor = conn.cursor()
+    data = []
 
     cursor.execute("SELECT name, score FROM results ORDER BY score DESC")
     for row in cursor.fetchall():
@@ -20,15 +29,14 @@ def get_score():
         data.append(_data)
 
     conn.close()
-
     return data
 
 def set_score():
     conn = sqlite3.connect('quiz_results.db')
     cursor = conn.cursor()
-
     cursor.execute("INSERT INTO results (name, score) VALUES (?, ?)", (session.get('username'), session.get('score')))
     conn.commit()
+    conn.close()
 
 @app.route('/')
 def index():
